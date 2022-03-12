@@ -5,5 +5,9 @@ Meteor.methods({
         LinksCollection.insert({
             title : title.trim()
         })
+    },
+    //New method created to fetch links
+    FindLinks(){
+        return LinksCollection.find({}).fetch();
     }
 });

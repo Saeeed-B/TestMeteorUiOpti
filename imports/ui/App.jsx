@@ -1,30 +1,36 @@
-import React , {useState} from 'react';
-import { LinksCollection } from '../api/Link';
-import { useTracker } from 'meteor/react-meteor-data';
+import React, {useEffect, useState} from 'react';
 export const App = () => {
   const [NewLink , SetNewLink] = useState('');
+  const [LinksLoading , SetLinksLoading] = useState(true);
+  const [Links , SetLinks] = useState([]);
 
-  const {Links,LinksLoading} = useTracker(() => {
+  const fetchLinks = () => {
+    Meteor.call('FindLinks', (err, links)=>{
+      SetLinksLoading(false);
+      if (err) {
+        console.log(err);
+      } else {
+        SetLinks(links);
+      }
+    });
+  }
 
-        const subs  = Meteor.subscribe('AllLinksPublish');
-        const LinksLoading = !subs.ready();
-        const Links = LinksCollection.find({}).fetch();
-
-        return {
-          Links,
-          LinksLoading
-        }; 
-  }); 
-
+  useEffect(() => {
+    fetchLinks();
+  }, [])
 
   const ChangeInput = (e)=>{
     SetNewLink(e.target.value);
   }
+
   const SubmitForm = (e)=>{
     e.preventDefault();
     Meteor.call('NewLink',NewLink , (err)=>{
         if (err) {
           console.log(err);
+        } else {
+          SetNewLink('');
+          fetchLinks();
         }
     })
   }
@@ -52,5 +58,5 @@ export const App = () => {
 
     </div>
   );
-  
+
 };
